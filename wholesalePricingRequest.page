@@ -1,0 +1,157 @@
+<apex:page standardController="Wholesale_Pricing_Request__c" tabStyle="Wholesale_Pricing_Request__c" extensions="wholesalePricingRequestExtension">
+        <!-- Includes jQuery library -->
+    <apex:includeScript value="{!URLFOR($Resource.jQuery223)}" />
+    
+    <style type="text/css">
+            /* colors the Message area where errors are shown */
+        * [errorMsgs] {
+            color: red; 
+            font-weight: bold;
+        }    
+            /* adds a red vertical bar indicating that the field is mandatory */
+        * [mandatory] {
+            border-left: 3px solid red;
+        }
+            /* adds a red vertical bar indicating that the Product Impact field is mandatory */
+        tr.multiSelectPicklistRow > td > select[title="Product Impact: - Chosen"] {
+            border-left: 3px solid red;
+        }
+            /* adds a red vertical bar indicating that the Requirement Lead field is mandatory */
+        tr.multiSelectPicklistRow > td > span > select[id$="_selected"] {
+            border-left: 3px solid red;
+        }
+            /* adds a red vertical bar indicating that the Products Required For CSP field is mandatory */        
+        tr.multiSelectPicklistRow > td > select[title="Products Required For CSP: - Chosen"] {
+            border-left: 3px solid red;
+        }
+            /* adds a red vertical bar indicating that the Requested Discounted Services field is mandatory */ 
+        tr.multiSelectPicklistRow > td > select[title="Requested Discounted Services: - Chosen"] {
+            border-left: 3px solid red;
+        }
+    </style>
+        <!-- *** NO LONGER USED *** does the same what '* [mandatory]' css selector above. However the CSS selector doesn't work properly with multipicklists (adding red borders to all 4 elements (2 multipicklists and 2 arrow buttons)). -->
+    <script type="text/javascript">
+        j$ = jQuery.noConflict();
+        j$(document).ready(function() {
+            //j$('[title^="Requirement Lead"]').css("border-left", "3px solid red"); - why isn't it working?
+            //j$('[title="Product Impact: - Available"]').css("border-left", "3px solid red");
+            //j$('.multiSelectPicklistTable').css("border-left", "3px solid red");
+            //j$('[title^="Requirement Lead"]').prop("disabled", true);
+            //document.getElementById("{!$Component.frm.toDisable}");
+            //console.log(document.getElementById("{!$Component.toDisable}"));
+            //j$('[id$=toDisable]').prop("disabled", true);
+        });
+    </script>
+
+    <apex:sectionHeader title="Wholesale Pricing Request" />
+    
+    <apex:outputPanel id="errorMsgs">
+        <apex:messages html-errorMsgs="" />
+    </apex:outputPanel>
+    
+    <apex:form id="frm">
+        
+        <apex:pageBlock title="Wholesale Pricing Request">
+            <apex:pageBlockButtons >
+                <apex:commandButton styleClass="box1" action="{!customSave}" value="Save" />
+                <apex:commandButton action="{!doCancel}" value="Cancel" />
+            </apex:pageBlockButtons>
+            
+            <apex:pageBlockSection title="Information">
+                <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Name}" />
+                <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Proposed_By__c}" />
+                <apex:inputField value="{!Wholesale_Pricing_Request__c.Opportunity__c}" />
+                <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Proposed_By_User__c}" />
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Product Impact">
+                <apex:inputField value="{!Wholesale_Pricing_Request__c.Product_Impact__c}" >
+                    <apex:actionSupport event="onchange" rerender="conditionalBlock, errorMsgs" />
+                </apex:inputField>
+                <apex:inputField value="{!Wholesale_Pricing_Request__c.Impact_on_other_BUs__c}" />
+                <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Pricing__c}">
+                    <apex:actionSupport event="onchange" rerender="conditionalBlock, errorMsgs" />
+                </apex:inputField>
+                <apex:inputField value="{!Wholesale_Pricing_Request__c.Engaged__c}" />
+                <apex:inputField value="{!Wholesale_Pricing_Request__c.Expected_CSI_Date__c}" />
+                <apex:inputField value="{!Wholesale_Pricing_Request__c.Cross_BU_Engagement__c}" />
+                <apex:inputField value="{!Wholesale_Pricing_Request__c.Partner_Engagement_Date__c}" />
+                <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Rational__c}" />
+
+            </apex:pageBlockSection>
+                
+            <apex:outputPanel id="conditionalBlock">
+
+                <apex:pageBlockSection title="Standard Pricing Detail" rendered="{!Wholesale_Pricing_Request__c.Pricing__c = 'STANDARD PRICING'}">
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Standard__c}" />
+                    <apex:pageBlockSectionItem />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Standard_Pricing_Notes__c}" />
+                </apex:pageBlockSection>
+            
+                <apex:pageBlockSection title="Bespoke Detail" rendered="{!Wholesale_Pricing_Request__c.Pricing__c = 'BESPOKE PRICING'}">
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Bespoke_Requirement__c}">
+                        <apex:actionSupport event="onchange" rerender="CSPDetailSection" />
+                    </apex:inputField>
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.CUSTOMER_s_IMPACTED__c}" />
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.PARTNER_s_IMPACTED__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.PLEASE_STATE_SPECIFIC_CUSTOMER_s__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.PLEASE_STATE_SPECIFIC_PARTNER_s__c}" />
+                    <apex:pageBlockSectionItem />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.BESPOKE_NOTES__c}" />
+                    
+                    
+                </apex:pageBlockSection>
+            
+            
+                <apex:outputPanel id="CSPDetailSection">
+                    <apex:pageBlockSection title="CSP Detail" rendered="{!OR(Wholesale_Pricing_Request__c.Bespoke_Requirement__c = 'Renew Combined Service Pool (CSP)', Wholesale_Pricing_Request__c.Bespoke_Requirement__c = 'New Combined Service Pool (CSP)')}">
+                        <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Existing__c}" />
+                        <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.TOTAL_VALUE_OF_CSP_COMMITMENT__c}" />
+                        <apex:inputField value="{!Wholesale_Pricing_Request__c.PRODUCTS_REQUIRED_FOR_CSP__c}" />
+                        <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.TERM_OF_CSP_COMMITMENT_MONTHS__c}" />
+                        <apex:inputField style="" value="{!Wholesale_Pricing_Request__c.REQUESTED_DISCOUNTED_SERVICES__c}" />
+                        <apex:pageBlockSectionItem />
+                        <apex:inputField value="{!Wholesale_Pricing_Request__c.CSP_NOTES__c}" />
+                        
+                        
+                    </apex:pageBlockSection>
+                </apex:outputPanel>
+                
+                <apex:pageBlockSection title="GX Details" rendered="{!OR(CONTAINS(Wholesale_Pricing_Request__c.Product_Impact__c, 'GX OTHER'), CONTAINS(Wholesale_Pricing_Request__c.Product_Impact__c, 'GX OTT'), CONTAINS(Wholesale_Pricing_Request__c.Product_Impact__c, 'GX SSP'))}">
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.GX_REQUIREMENT__c}" />
+                    <apex:pageBlockSectionItem />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.GX_NOTES__c}" />
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Pricing Proposal - Further Considerations">
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.APPROVED_BY_ALL_IMPACTED_BUs__c}" />
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Agreed__c}" />
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.COMPETITOR_INTELLIGENCE_ATTACHED__c}" />
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.Group_Pricing_BU__c}" />
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.MARKET_INTELLIGENCE_ATTACHED__c}" />
+                    <apex:inputField styleClass="classRed" id="toDisable" value="{!Wholesale_Pricing_Request__c.Requirement_Lead__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Group_Pricing__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.ADDITIONAL_NOTES__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Group_Pricing_Feedback_Notes__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Wholesale_Pricing_Notification__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.INTERNAL_GROUP_PRICING_NOTES__c}" />
+                   
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Group Pricing Review: Implementation & Business Case Sign Off">
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Confirmed_CSI_Date__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.CONTRACTS_LEGAL_IMPACT__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.BSS_Impact__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Confirmed_Date__c}" />
+                    <apex:inputField html-mandatory="" value="{!Wholesale_Pricing_Request__c.DEVELOPMENT_IAP_APPROVED__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Other_Annex_Agreement_Changes_Impacted__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.BSS_Development_Summary_Notes__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Contracts_Team_Summary_Notes__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Detail__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.IMPACTED_BUs_ANALYSIS_PROVIDED_TO_OTHER__c}" />
+                    <apex:inputField value="{!Wholesale_Pricing_Request__c.Request_Stage__c}" />
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

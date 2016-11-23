@@ -1,0 +1,5 @@
+<apex:page standardController="Demo_Request__c">
+    <flow:interview name="DemoRequestG2Completion" finishLocation="/{!Demo_Request__c.Id}">
+        <apex:param name="DemoStatusId" value="{!Demo_Request__c.Id}"/>
+    </flow:interview>
+</apex:page>

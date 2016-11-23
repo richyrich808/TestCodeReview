@@ -1,0 +1,5 @@
+<apex:page standardController="Wholesale_Pricing_Request__c" tabStyle="Wholesale_Pricing_Request__c" extensions="wholesalePricingRequestDetails" showHeader="true">
+
+                <apex:detail subject="{!idRequest}" />
+
+</apex:page>

@@ -1,0 +1,2 @@
+<apex:page standardController="Demo_Request__c" recordSetVar="a" action="{!if($Profile.Name='Inmarsat G2 Users','/a0A?fcf=00B37000002CBcS','/a0A/o?nooverride=false')}" >
+</apex:page>
